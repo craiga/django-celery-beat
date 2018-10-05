@@ -211,11 +211,14 @@ class DatabaseScheduler(Scheduler):
     def all_as_schedule(self):
         debug('DatabaseScheduler: Fetching database schedule')
         s = {}
-        for model in self.Model.objects.enabled():
-            try:
-                s[model.name] = self.Entry(model, app=self.app)
-            except ValueError:
-                pass
+        try:
+            for model in self.Model.objects.enabled():
+                try:
+                    s[model.name] = self.Entry(model, app=self.app)
+                except ValueError:
+                    pass
+        except DatabaseError as exc:
+            logger.exception('Database gave error: %r', exc)
         return s
 
     def schedule_changed(self):
